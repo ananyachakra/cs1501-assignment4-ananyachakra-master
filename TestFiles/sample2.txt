@@ -1,0 +1,14 @@
+6
+# Nodes
+A false
+B false
+C true
+D true
+E false
+F false
+
+# Edges
+A B 2 3
+B C 4 2
+E F 3 3
+F D 2 2

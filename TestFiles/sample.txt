@@ -1,0 +1,15 @@
+5
+# Nodes (format: node vulnerable?)
+A false
+B false
+C true
+D false
+E true
+
+# Edges (format: node1 node2 latency encryption_level)
+A B 4 3
+A C 2 2
+B D 3 2
+C D 1 3
+D E 5 1
+C E 7 3
