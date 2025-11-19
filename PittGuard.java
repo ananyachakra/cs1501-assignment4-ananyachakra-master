@@ -212,7 +212,14 @@ public class PittGuard {
         while (!q.isEmpty()) {
             String u = q.poll();
             int d = dist.get(u);
-            for (Edge e : g.adj.getOrDefault(u, List.of())) {
+
+            // replace List.of() with a Java-8-safe pattern
+            List<Edge> edges = g.adj.get(u);
+            if (edges == null) {
+                edges = Collections.emptyList();
+            }
+
+            for (Edge e : edges) {
                 if (!g.vulnerable.getOrDefault(e.to, false)) continue; //skips non vulnerable values 
                 if (dist.containsKey(e.to)) continue; //already visited 
                 dist.put(e.to, d + 1);
@@ -236,13 +243,25 @@ public class PittGuard {
         dist.put(server, 0.0);
 
         //Priority queue
-        PriorityQueue<String> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+        PriorityQueue<String> pq = new PriorityQueue<>(new Comparator<String>() {
+            @Override
+            public int compare(String a, String b) {
+                return Double.compare(dist.get(a), dist.get(b));
+            }
+        });
         pq.add(server);
 
         while (!pq.isEmpty()) {
             String u = pq.poll();
             double du = dist.get(u);
-            for (Edge e : g.adj.getOrDefault(u, List.of())) {
+
+            // replace List.of() with a Java-8-safe pattern
+            List<Edge> edges = g.adj.get(u);
+            if (edges == null) {
+                edges = Collections.emptyList();
+            }
+
+            for (Edge e : edges) {
                 double nd = du + e.effectiveCost();
 
                 //relax edge
@@ -288,10 +307,16 @@ public class PittGuard {
 
         try {
             //dispatch to correct mode
+            // (use classic switch for compatibility with older Java)
             switch (cli.mode) {
-                case "infect" -> System.out.println(infectMinHops(g, cli.src, cli.dst));
-                case "patch" -> System.out.println(patchRadius(g, cli.server));
-                default -> usageAndExit("Unknown mode: " + cli.mode, 2);
+                case "infect":
+                    System.out.println(infectMinHops(g, cli.src, cli.dst));
+                    break;
+                case "patch":
+                    System.out.println(patchRadius(g, cli.server));
+                    break;
+                default:
+                    usageAndExit("Unknown mode: " + cli.mode, 2);
             }
         } catch (IllegalArgumentException e) {
             //algorithm level malformed input
